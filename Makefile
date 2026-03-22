@@ -52,6 +52,7 @@ atlas-inspect:
 	$(RUN) atlas schema inspect --env local
 
 atlas-apply:
+	$(EXEC) db_dev psql "$(APP_DEV_DB_URL)" -c "CREATE EXTENSION IF NOT EXISTS vector;"
 	$(RUN) atlas schema apply --env local --auto-approve
 
 ps:
