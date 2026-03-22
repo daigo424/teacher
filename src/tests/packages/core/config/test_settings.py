@@ -3,6 +3,7 @@ from packages.core.config.settings import Settings
 
 def test_settings_uses_defaults_when_optional_values_are_missing():
     settings = Settings(
+        env="test",
         app_db_url="sqlite+pysqlite:///:memory:",
         openai_api_key="test-key",
         _env_file=None,

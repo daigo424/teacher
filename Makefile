@@ -5,11 +5,14 @@ export
 ATLAS := atlas
 ATLAS_ENV := local
 COMPOSE := docker compose -f docker/docker-compose.local.yml
+RUN := $(COMPOSE) run --rm --remove-orphans
+EXEC := $(COMPOSE) exec
 
 .PHONY: build up down logs \
-		schema-apply schema-inspect atlas-version \
-		ps db db-dev \
-		shell shell-db shell-db-dev
+		all-check format lint lint-fix test typecheck \
+		ingest wikipedia_to_markdown \
+		atlas-version atlas-inspect atlas-apply \
+		ps db db-dev shell-% shell-run-%
 
 build:
 	$(COMPOSE) build --no-cache
@@ -22,46 +25,46 @@ down:
 all-check: format test typecheck lint-fix
 
 typecheck:
-	$(COMPOSE) run --rm app sh -c "cd /app/src && mypy ."
+	$(RUN) app sh -c "cd /app/src && mypy ."
 
 format:
-	$(COMPOSE) run --rm app python -m ruff format ./src
+	$(RUN) app python -m ruff format ./src
 
 lint:
-	$(COMPOSE) run --rm app python -m ruff check ./src
+	$(RUN) app python -m ruff check ./src
 
 lint-fix:
-	$(COMPOSE) run --rm app python -m ruff check ./src --fix
+	$(RUN) app python -m ruff check ./src --fix
 
 test:
-	$(COMPOSE) run --rm app python -m pytest
+	$(RUN) app python -m pytest
 
 ingest:
-	$(COMPOSE) run --rm ingest python -m apps.ingest.main $(FILEPATH)
+	$(RUN) ingest python -m apps.ingest.main $(FILEPATH)
 
 wikipedia_to_markdown:
-	$(COMPOSE) run --rm wikipedia_to_markdown python -m apps.wikipedia_to_markdown.main $(URL)
+	$(RUN) wikipedia_to_markdown python -m apps.wikipedia_to_markdown.main $(URL)
 
 atlas-version:
-	$(COMPOSE) run --rm atlas version
+	$(RUN) atlas version
 
 atlas-inspect:
-	$(COMPOSE) run --rm atlas schema inspect --env local
+	$(RUN) atlas schema inspect --env local
 
 atlas-apply:
-	$(COMPOSE) run --rm atlas schema apply --env local --auto-approve
+	$(RUN) atlas schema apply --env local --auto-approve
 
 ps:
 	$(COMPOSE) ps
 
 shell-%:
-	$(COMPOSE) exec $* bash || $(COMPOSE) exec $* sh
+	$(EXEC) $* bash || $(EXEC) $* sh
 
 shell-run-%:
-	$(COMPOSE) run --rm $* bash || $(COMPOSE) run --rm $* sh
+	$(RUN) $* bash || $(RUN) $* sh
 
 db:
-	$(COMPOSE) exec db psql "$(APP_DB_URL)"
+	$(EXEC) db psql "$(APP_DB_URL)"
 
 db-dev:
-	$(COMPOSE) exec db_dev psql "$(APP_DEV_DB_URL)"
+	$(EXEC) db_dev psql "$(APP_DEV_DB_URL)"
