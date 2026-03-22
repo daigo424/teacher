@@ -4,7 +4,7 @@ from apps.api.routers.ask import router as ask_router
 from apps.api.routers.health import router as health_router
 from packages.core.config import settings
 
-if settings.env == "local":
+if settings.env == "local" and settings.debug:
     import debugpy
 
     debugpy.listen(("0.0.0.0", 5678))

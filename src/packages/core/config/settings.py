@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     env: str
     app_db_url: str
     openai_api_key: str
+    debug: bool = False
     embedding_model: str = "text-embedding-3-small"
     chat_model: str = "gpt-4o-mini"
     top_k: int = 3
