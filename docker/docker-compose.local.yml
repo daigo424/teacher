@@ -59,7 +59,7 @@ services:
     container_name: pgvector_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: app_db
+      POSTGRES_DB: healthcheck_db
       POSTGRES_USER: app_user
       POSTGRES_PASSWORD: app_pass
       TZ: Asia/Tokyo
@@ -70,7 +70,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db"]
+      test: ["CMD-SHELL", "pg_isready -U app_user -d healthcheck_db"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -80,7 +80,7 @@ services:
     container_name: pgvector_dev_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: app_db
+      POSTGRES_DB: healthcheck_db
       POSTGRES_USER: app_user
       POSTGRES_PASSWORD: app_pass
       TZ: Asia/Tokyo
@@ -88,7 +88,7 @@ services:
     volumes:
       - ./db/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db"]
+      test: ["CMD-SHELL", "pg_isready -U app_user -d healthcheck_db"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -100,7 +100,7 @@ services:
     container_name: atlas_cli
     working_dir: /workspace
     volumes:
-      - ../db/app_db:/workspace
+      - ../db:/workspace
     env_file:
       - ../.env
     depends_on:

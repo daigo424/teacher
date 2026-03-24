@@ -7,9 +7,12 @@ ATLAS_ENV := local
 COMPOSE := docker compose -f docker/docker-compose.local.yml
 RUN := $(COMPOSE) run --rm --remove-orphans
 EXEC := $(COMPOSE) exec
+APP_DB_URL := postgresql://$(APP_DB_USERNAME):$(APP_DB_PASSWORD)@$(APP_DB_HOST):$(APP_DB_PORT)/$(APP_DB_NAME)?sslmode=$(APP_DB_SSLMODE)
+APP_ATLAS_DEV_DB_URL := postgresql://$(APP_ATLAS_DEV_DB_USERNAME):$(APP_ATLAS_DEV_DB_PASSWORD)@$(APP_ATLAS_DEV_DB_HOST):$(APP_ATLAS_DEV_DB_PORT)/$(APP_ATLAS_DEV_DB_NAME)?sslmode=$(APP_ATLAS_DEV_DB_SSLMODE)
+
 
 .PHONY: build up down logs \
-		all-check format lint lint-fix test typecheck \
+		all-check format format-check lint lint-fix test typecheck \
 		ingest wikipedia_to_markdown \
 		atlas-version atlas-inspect atlas-apply \
 		ps db db-dev shell-% shell-run-%
@@ -29,6 +32,9 @@ typecheck:
 
 format:
 	$(RUN) app python -m ruff format ./src
+
+format-check:
+	$(RUN) app python -m ruff format ./src --check
 
 lint:
 	$(RUN) app python -m ruff check ./src
@@ -52,20 +58,25 @@ atlas-inspect:
 	$(RUN) atlas schema inspect --env local
 
 atlas-apply:
-	$(EXEC) db_dev psql "$(APP_DEV_DB_URL)" -c "CREATE EXTENSION IF NOT EXISTS vector;"
-	$(RUN) atlas schema apply --env local --auto-approve
+	$(RUN) atlas schema apply --env local --config "file://app/atlas.hcl"
+
+atlas-apply-test:
+	$(RUN) atlas schema apply --env test --config "file://app/atlas.hcl"
+
+rm-volumes:
+	docker compose -f docker/docker-compose.local.yml down --volumes
 
 ps:
 	$(COMPOSE) ps
 
 shell-%:
-	$(EXEC) $* bash || $(EXEC) $* sh
+	$(EXEC) $* bash || $(EXEC) $* sh || $(EXEC) $* ash
 
 shell-run-%:
-	$(RUN) $* bash || $(RUN) $* sh
+	$(RUN) --entrypoint bash $* || $(RUN) --entrypoint sh $* || $(RUN) --entrypoint ash $*
 
 db:
 	$(EXEC) db psql "$(APP_DB_URL)"
 
-db-dev:
-	$(EXEC) db_dev psql "$(APP_DEV_DB_URL)"
+db-atlas-dev:
+	$(EXEC) db_dev psql "$(APP_ATLAS_DEV_DB_URL)"

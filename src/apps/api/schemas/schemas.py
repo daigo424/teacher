@@ -4,7 +4,7 @@ from packages.core.schemas import RetrievedChunk
 
 
 class AskRequest(BaseModel):
-    question: str = Field(min_length=1)
+    question: str = Field(min_length=1, max_length=100)
 
 
 class AskResponse(BaseModel):

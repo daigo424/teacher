@@ -29,4 +29,6 @@ htmlcov/
 
 *.swp
 
+tmp/
+
 .env
