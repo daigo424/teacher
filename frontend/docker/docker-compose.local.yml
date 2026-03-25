@@ -1,0 +1,16 @@
+services:
+  frontend:
+    build:
+      context: ../..
+      dockerfile: frontend/docker/local.Dockerfile
+    container_name: teacher_frontend
+    working_dir: /app/frontend
+    volumes:
+      - ../..:/app
+    environment:
+      TZ: Asia/Tokyo
+      API_BASE_URL: http://host.docker.internal:8000
+    ports:
+      - "8501:8501"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
