@@ -1,13 +1,10 @@
 SHELL := /bin/bash
-include .env
+-include .env
 export
 
 COMPOSE := docker compose -f docker/docker-compose.local.yml
 RUN := $(COMPOSE) run --rm --remove-orphans
 EXEC := $(COMPOSE) exec
-
-.PHONY: build up down　\
-		shell-% shell-run-%
 
 build:
 	$(COMPOSE) build --no-cache

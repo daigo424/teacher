@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-include .env
+-include .env
 export
 
 ATLAS := atlas
@@ -10,15 +10,12 @@ EXEC := $(COMPOSE) exec
 APP_DB_URL := postgresql://$(APP_DB_USERNAME):$(APP_DB_PASSWORD)@$(APP_DB_HOST):$(APP_DB_PORT)/$(APP_DB_NAME)?sslmode=$(APP_DB_SSLMODE)
 APP_ATLAS_DEV_DB_URL := postgresql://$(APP_ATLAS_DEV_DB_USERNAME):$(APP_ATLAS_DEV_DB_PASSWORD)@$(APP_ATLAS_DEV_DB_HOST):$(APP_ATLAS_DEV_DB_PORT)/$(APP_ATLAS_DEV_DB_NAME)?sslmode=$(APP_ATLAS_DEV_DB_SSLMODE)
 
-
-.PHONY: build up down logs \
-		all-check format format-check lint lint-fix test typecheck \
-		ingest wikipedia_to_markdown \
-		atlas-version atlas-inspect atlas-apply \
-		ps db db-dev shell-% shell-run-%
-
 build:
 	$(COMPOSE) build --no-cache
+
+build-app:
+	$(COMPOSE) build app
+
 up:
 	$(COMPOSE) up
 
@@ -28,7 +25,7 @@ down:
 all-check: format test typecheck lint-fix
 
 typecheck:
-	$(RUN) app sh -c "cd /app/src && mypy ."
+	$(RUN) app mypy ./src
 
 format:
 	$(RUN) app python -m ruff format ./src
