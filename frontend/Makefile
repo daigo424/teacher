@@ -14,6 +14,9 @@ up:
 down:
 	$(COMPOSE) down
 
+update-requirements:
+	uv export --format requirements-txt > requirements.txt
+
 shell-%:
 	$(EXEC) $* bash || $(EXEC) $* sh || $(EXEC) $* ash
 

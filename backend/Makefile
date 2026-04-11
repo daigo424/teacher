@@ -22,6 +22,10 @@ up:
 down:
 	$(COMPOSE) down
 
+update-requirements:
+	uv export --format requirements-txt > requirements.txt
+	uv export --format requirements-txt --group dev > requirements-dev.txt
+
 all-check: format test typecheck lint-fix
 
 typecheck:
